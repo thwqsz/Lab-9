@@ -1,72 +1,45 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///portfolio.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app = Flask('Furniture store')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///project.db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
-# products = [
-#     {'prod_name': 'sofa',
-#      'price': 12000,
-#      'in_stock': False,
-#      'id': 0},
-#     {'prod_name': 'table',
-#      'price': 6000,
-#      'in_stock': True,
-#      'id': 1},
-#     {'prod_name': 'chair',
-#      'price': 8000,
-#      'in_stock': False,
-#      'id': 2},
-# ]
-
-
-class Product(db.Model):
+class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    prod_name = db.Column(db.String(300))
-    price = db.Column(db.Integer)
-    in_stock = db.Column(db.Boolean, default=True)
+    title = db.Column(db.String(100))
+    link = db.Column(db.String(300))
 
     def __repr__(self):
-        return f'Product{self.id}. {self.prod_name} - {self.price} rub.'
+        return f'{self.title} - {self.link}'
 
 
 @app.route('/')
-def main():
-    products = Product.query.all()
-    return render_template('index.html', products_list=products)
-
-
-@app.route('/in_stock/<product_id>', methods=['PATCH'])
-def modify_product(product_id):
-    product = Product.query.get(product_id)
-    product.in_stock = request.json['in_stock']
-    db.session.commit()
-    # global products
-    # in_stock = request.json['in_stock']
-    # for product in products:
-    #     if product['id'] == product_id:
-    #         product.update({'in_stock': in_stock})
-    # return 'OK'
+def index():
+    projects = Project.query.all()
+    return render_template('index.html', projects=projects)
 
 
 @app.route('/add', methods=['POST'])
-def add_product():
-    data = request.json
-    product = Product(**data)
-    db.session.add(product)
+def add():
+    title = request.form['title']
+    link = request.form['link']
+    project = Project(title=title, link=link)
+    db.session.add(project)
     db.session.commit()
+    return redirect(url_for('index'))
 
-    # id_last = products[-1]['id']
-    # id_new = id_last + 1
-    # data['id'] = id_new
-    # products.append(data)
-    return 'OK'
 
+@app.route('/clear', methods=['POST'])
+def clear():
+    db.session.query(Project).delete()
+    db.session.commit()
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':

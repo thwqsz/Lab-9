@@ -1,35 +1,32 @@
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-    <title>Best store!</title>
-    <script type="text/javascript" src="/static/update.js"></script>
-    <link href="static/store.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Портфолио разработчика</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='store.css') }}">
 </head>
-
 <body>
-    <h1>Furniture store:</h1>
-    <h3>Add new product:</h3>
-    <form>
-        <div>
-            <input type="text" name="prod_name" id="prod_name">
-            <label for="prod_name">Product name</label>
-        </div>
-        <div>
-            <input type="number" name="price" id="price">
-            <label for="price">Price (rub.)</label>
-        </div>
-        <button onClick="addProduct()">Add</button>
+    <header>
+        <h1>Портфолио разработчика</h1>
+    </header>
+
+    <form action="/add" method="post">
+        <input type="text" name="title" placeholder="Название проекта" required>
+        <input type="url" name="link" placeholder="Ссылка на репозиторий" required>
+        <button type="submit">Добавить</button>
     </form>
-    <ul>
-        {% for product in products_list %}
-        <li>
-            <div>
-                <div>{{ product['prod_name'] }}</div>
-                <div>{{ product['price'] }} rub.</div>
-                <input value="{{product['id']}}" onChange="updateProd(this)" name="in_stock" type="checkbox" {% if product.in_stock %} checked {% endif %}>
-                <label for="in_stock">In stock</label>
+
+    <form action="/clear" method="post">
+        <button type="submit">Очистить список</button>
+    </form>
+
+    <div>
+        {% for project in projects %}
+            <div class="project">
+                <strong>{{ project.title }}</strong> —
+                <a href="{{ project.link }}" target="_blank">ссылка</a>
             </div>
-        </li>
         {% endfor %}
-    </ul>
+    </div>
 </body>
 </html>
